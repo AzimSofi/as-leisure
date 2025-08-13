@@ -30,7 +30,7 @@
                 border: 1px solid #e0e0e0;
                 border-radius: 30px;
                 padding: 8px 16px;
-                background-color: #f7f7f7; /* Light grey background for input */
+                background-color: #f7f7f7;
             }
             .chat-input {
                 flex-grow: 1;
@@ -51,10 +51,21 @@
                 display: flex;
                 align-items: center;
                 justify-content: center;
-                color: #a0a0a0;
+                color: black;
             }
-            .icon-button:hover {
-                color: #707070;
+            .send-button {
+                background-color: black;
+                color: white;
+                border-radius: 50%;
+                transition: background-color 0.3s ease, color 0.3s ease;
+            }
+            .send-button.hidden {
+                display: none;
+            }
+
+            #mic-menu-button:hover {
+                background: #e0e0e0;
+                border-radius: 50%;
             }
         </style>
     </head>
@@ -79,18 +90,7 @@
 
         <main class="flex-grow flex flex-col items-center justify-center text-center p-4">
             <h1 class="text-3xl font-light text-gray-700 mb-8">Ask anything</h1>
-            <div class="chat-input-wrapper">
-                <button class="icon-button">
-                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path></svg>
-                </button>
-                <input type="text" placeholder="Where should we begin?" class="chat-input">
-                <button class="icon-button">
-                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11a7 7 0 01-7 7v0a7 7 0 01-7-7V7a7 7 0 0114 0v4z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 18v3m-3-3h6"></path></svg>
-                </button>
-                <button class="icon-button">
-                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path></svg>
-                </button>
-            </div>
+            @include("livewire.chatbot")
         </main>
     </body>
 </html>
