@@ -7,6 +7,7 @@
         <link rel="preconnect" href="https://fonts.bunny.net">
         <link href="https://fonts.bunny.net/css?family=inter:400,500,600" rel="stylesheet" />
         @vite(['resources/css/app.css', 'resources/js/app.js'])
+        @livewireStyles
         <style>
             body {
                 font-family: 'Inter', sans-serif;
@@ -59,9 +60,6 @@
                 border-radius: 50%;
                 transition: background-color 0.3s ease, color 0.3s ease;
             }
-            .send-button.hidden {
-                display: none;
-            }
 
             #mic-menu-button:hover {
                 background: #e0e0e0;
@@ -88,9 +86,12 @@
             </div>
         </header>
 
-        <main class="flex-grow flex flex-col items-center justify-center text-center p-4">
-            <h1 class="text-3xl font-light text-gray-700 mb-8">Ask anything</h1>
-            @include("livewire.chatbot")
+        <main class="flex-grow flex flex-col items-center text-center p-4">
+            <h1 class="text-3xl font-light text-gray-700 mb-8 header-message mt-55">Ask anything</h1>
+            <div class="w-full">
+              @livewire('chatbot')
+            </div>
         </main>
+        @livewireScripts
     </body>
 </html>
