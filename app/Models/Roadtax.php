@@ -9,4 +9,9 @@ class Roadtax extends Model
 {
     /** @use HasFactory<\Database\Factories\RoadtaxFactory> */
     use HasFactory;
+
+    protected $fillable = [
+        "vehicle_number",
+        "expiry_date"
+    ];
 }

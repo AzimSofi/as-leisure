@@ -11,23 +11,37 @@ class Chatbot extends Component
     public $message = '';
     public $chatHistory = [];
     public $hasMessages = false;
+    public $roadtaxDetails = [];
 
     public function mount()
     {
         $this->updateHasMessages();
-        $this->chatHistory = [
-            [
-                'sender' => 'user',
-                'text' => 'こんにちは',
-                'time' => now()->format('H:i')
-            ],
-            [
-                'sender' => 'bot',
-                'text' => 'こんにちは！どのようなご用件でしょうか？',
-                'time' => now()->subMinutes(5)->format('H:i')
-            ]
-        ];
-        $this->chatHistory = [];
+
+        // Load chat history from session if available
+        if (session()->has('chatHistory')) {
+            $this->chatHistory = session('chatHistory');
+            session()->forget('chatHistory'); // Clear it after loading
+        } else {
+            // Initial messages if no history
+            /*$this->chatHistory = [
+                [
+                    'sender' => 'user',
+                    'text' => 'こんにちは',
+                    'time' => now()->format('H:i')
+                ],
+                [
+                    'sender' => 'bot',
+                    'text' => 'こんにちは！どのようなご用件でしょうか？',
+                    'time' => now()->subMinutes(5)->format('H:i')
+                ]
+            ];*/
+        }
+
+        // Load roadtax details from session if available
+        if (session()->has('roadtaxDetails')) {
+            $this->roadtaxDetails = session('roadtaxDetails');
+            session()->forget('roadtaxDetails'); // Clear it after loading
+        }
     }
 
     public function sendMessage()
@@ -79,16 +93,11 @@ class Chatbot extends Component
                     'functionDeclarations' => [
                         [
                             'name' => 'getRoadtaxDetails',
-                            'description' => 'Gets road tax details for a given vehicle number, including expiry date.',
+                            'description' => 'Retrieves all road tax records from the database without requiring any specific vehicle number.',
                             'parameters' => [
                                 'type' => 'object',
-                                'properties' => [
-                                    'vehicle_number' => [
-                                        'type' => 'string',
-                                        'description' => 'The vehicle registration number (e.g., ABC1234).'
-                                    ]
-                                ],
-                                'required' => ['vehicle_number']
+                                'properties' => new \stdClass(), // No properties needed as it will fetch all data
+                                'required' => []     // No required parameters
                             ]
                         ]
                     ]
@@ -131,6 +140,11 @@ class Chatbot extends Component
 
                 try {
                     $toolOutput = $this->handleFunctionCall($functionName, $args);
+                    // If a redirect was initiated, we don't need to send tool output back to Gemini
+                    // as the page will refresh. Return an empty string to signify completion.
+                    if ($toolOutput === 'REDIRECT_INITIATED') {
+                        return '';
+                    }
                     // Send the tool output back to Gemini for a final response
                     return $this->getAiResponseWithToolOutput($prompt, $toolOutput, $model);
                 } catch (\Exception $e) {
@@ -152,22 +166,13 @@ class Chatbot extends Component
     {
         switch ($functionName) {
             case 'getRoadtaxDetails':
-                if (!isset($args['vehicle_number'])) {
-                    throw new \Exception('Missing vehicle_number for getRoadtaxDetails function.');
-                }
-                $vehicleNumber = $args['vehicle_number'];
-                // Use direct API path instead of route() helper to avoid route definition issues
-                $response = Http::get(url('/api/road-taxes',/* ['vehicle_number' => $vehicleNumber]*/));
-
-                if ($response->successful()) {
-                    return $response->json();
-                } else {
-                    Log::error('API call failed for roadtax details', [
-                        'status' => $response->status(),
-                        'body' => $response->body(),
-                    ]);
-                    throw new \Exception('Failed to fetch road tax details from API.');
-                }
+                // The AI requested road tax details. Redirect to the main page
+                // which now fetches all road tax data via RoadtaxController::showRoadtaxes.
+                // No need to fetch specific data here or pass via session, as the
+                // web route will handle fetching all data.
+                session()->flash('chatHistory', $this->chatHistory); // Preserve chat history
+                $this->redirect('/?show_roadtax=true'); // Redirect with flag to show road tax
+                return 'REDIRECT_INITIATED'; // Indicate that a redirect was initiated
                 break;
             default:
                 throw new \Exception('Unknown function call: ' . $functionName);
@@ -194,13 +199,13 @@ class Chatbot extends Component
                 [
                     'role' => 'model',
                     'parts' => [
-                        ['functionCall' => ['name' => 'getRoadtaxDetails', 'args' => ['vehicle_number' => $toolOutput['data'][0]['vehicle_number'] ?? '']]]
+                        ['functionCall' => ['name' => 'getRoadtaxDetails', 'args' => new \stdClass()]] // Pass an empty object for args
                     ]
                 ],
                 [
                     'role' => 'tool',
                     'parts' => [
-                        ['functionResponse' => ['name' => 'getRoadtaxDetails', 'response' => $toolOutput]]
+                        ['functionResponse' => ['name' => 'getRoadtaxDetails', 'response' => (array)$toolOutput]]
                     ]
                 ]
             ],
@@ -209,16 +214,11 @@ class Chatbot extends Component
                     'functionDeclarations' => [
                         [
                             'name' => 'getRoadtaxDetails',
-                            'description' => 'Gets road tax details for a given vehicle number, including expiry date.',
+                            'description' => 'Retrieves all road tax records from the database without requiring any specific vehicle number.',
                             'parameters' => [
                                 'type' => 'object',
-                                'properties' => [
-                                    'vehicle_number' => [
-                                        'type' => 'string',
-                                        'description' => 'The vehicle registration number (e.g., ABC1234).'
-                                    ]
-                                ],
-                                'required' => ['vehicle_number']
+                                'properties' => new \stdClass(), // No properties needed
+                                'required' => []     // No required parameters
                             ]
                         ]
                     ]
@@ -265,3 +265,5 @@ class Chatbot extends Component
         return view('livewire.chatbot');
     }
 }
+
+// The extractArgsFromPrompt method is no longer needed and has been removed.

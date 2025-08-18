@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::create('roadtaxes', function (Blueprint $table) {
             $table->id();
             $table->string("vehicle_number");
-            $table->date("expiry-date");
+            $table->date("expiry_date");
             $table->timestamps();
         });
     }

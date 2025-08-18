@@ -91,6 +91,21 @@
             <div class="w-full">
               @livewire('chatbot')
             </div>
+
+            @isset($roadtaxes)
+                <div class="mt-8 w-full max-w-3xl text-left">
+                    <h2 class="text-2xl font-semibold mb-4">Road Tax Information</h2>
+                    @if ($roadtaxes->isEmpty())
+                        <p>No road tax data available.</p>
+                    @else
+                        <ul class="list-disc list-inside">
+                            @foreach ($roadtaxes as $roadtax)
+                                <li>Vehicle Number: {{ $roadtax->vehicle_number ?? 'N/A' }}, Expiry Date: {{ $roadtax->expiry_date ?? 'N/A' }}</li>
+                            @endforeach
+                        </ul>
+                    @endif
+                </div>
+            @endisset
         </main>
         @livewireScripts
     </body>

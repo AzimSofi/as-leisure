@@ -24,6 +24,20 @@ class RoadtaxController extends Controller
     }
 
     /**
+     * Display all roadtaxes for the web view, optionally showing them based on a request parameter.
+     */
+    public function showRoadtaxes(Request $request)
+    {
+        $roadtaxes = collect(); // Initialize as an empty collection by default
+
+        if ($request->query('show_roadtax') === 'true') {
+            $roadtaxes = Roadtax::all();
+        }
+
+        return view('welcome', ['roadtaxes' => $roadtaxes]);
+    }
+
+    /**
      * Show the form for creating a new resource.
      */
     public function create()
