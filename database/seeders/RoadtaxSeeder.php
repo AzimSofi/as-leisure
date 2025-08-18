@@ -14,7 +14,7 @@ class RoadtaxSeeder extends Seeder
     public function run(): void
     {
         DB::table("roadtaxes")->insert([
-            ["expiry-date" => "2026-08-18",]
+            ["vehicle_number" => "VGY 8704","expiry-date" => "2026-08-18", "created_at" => now(), "updated_at" => now()]
         ]);
     }
 }

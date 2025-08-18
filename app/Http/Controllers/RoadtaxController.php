@@ -5,15 +5,22 @@ namespace App\Http\Controllers;
 use App\Models\Roadtax;
 use App\Http\Requests\StoreRoadtaxRequest;
 use App\Http\Requests\UpdateRoadtaxRequest;
+use Illuminate\Http\Request; // Add this import
 
 class RoadtaxController extends Controller
 {
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
-        //
+        $query = Roadtax::query();
+
+        if ($request->has('vehicle_number')) {
+            $query->where('vehicle_number', $request->input('vehicle_number'));
+        }
+
+        return response()->json(['data' => $query->get()]);
     }
 
     /**
